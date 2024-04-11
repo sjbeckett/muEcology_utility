@@ -48,10 +48,12 @@ volume_2_radius<-function(X){
 return( (3.0*X/(4.0*pi))^(1.0/3.0) )
 }
 
-IndivPerL_2_BiomassPermmol<-function(X,Q){
-return( Litres_2_cubicmetres((X*Q) )
+IndivPerL_2_BiomassmmolPerCubicmetre<-function(X,Q){
+#  [#ind/L]  ->  [mmol Q m^-3]
+return( Litres_2_cubicmetres(X*Q) )
 }
 
-BiomassPermmol_2_IndivPerL<-function(X,Q){
+BiomassmmolPerCubicmetre_2_IndivPerL<-function(X,Q){
+#  [mmol Q m^-3] -> [#ind/L]
 return( cubicmetres_2_Litres(X/Q) )
 }
