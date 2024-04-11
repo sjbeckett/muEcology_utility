@@ -1,6 +1,8 @@
 
-#reference individual level quotas (from Paul) in terms of [mmol N/indiv]
+#reference individual level quotas (from Paul) in terms of [μmol N/indiv]
 referenceQ = c(1.7*10^-7.0, 6.1*10^-10.0 , 10^-11.0, 10^-11.0)
+#convert from micromole to milimole [ μmol -->  mmol]
+referenceQ = referenceQ*1000
 referenceName = c("diatom cells", "Pro. cells", "diatom viruses", "Pro. viruses")
 
 #some reference values in L/day to encompass organism densities and contact rates
