@@ -18,7 +18,7 @@ for(aa in 1:length(refvals_perL)){
 #put into tabular format
 JJ = cbind(refvals_perL,mmolcubicm_MAT)
 JJ = as.data.frame(JJ)
-names(JJ) = c("reference [ indiv/L ]", paste("[mmol N m^-3]",referenceName))
+names(JJ) = c("reference [ indiv/L ]", paste("[mmol N m^-3 / μmol N L^-1]",referenceName))
 
 
 #write to file
