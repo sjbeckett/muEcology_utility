@@ -48,6 +48,14 @@ volume_2_radius<-function(X){
 return( (3.0*X/(4.0*pi))^(1.0/3.0) )
 }
 
+ Celcius2Kelvin<-function(T){
+	return(T + 273.16)
+ }
+
+ Kelvin2Celcius<-function(T){
+	return(T - 273.16)
+ }
+
 IndivPerL_2_BiomassmmolPerCubicmetre<-function(X,Q){
 #  [#ind/L]  ->  [mmol Q m^-3]
 return( Litres_2_cubicmetres(X*Q) )
