@@ -50,8 +50,8 @@ dynamicViscosity <- function(Temperature=15, Salinity=35){
   	#from MIT seawater:  http://web.mit.edu/seawater/
   	# VALIDITY: 0 < T < 180 C and 0 < S < 150 g/kg; ACCURACY: 1.5%
 
-  	S = Sal
-  	T = Temp
+  	S = Salinity
+  	T = Temperature
   	S = S/1000
   	a = c(1.5700386464E-01,6.4992620050E+01,-9.1296496657E+01,4.2844324477E-05,1.5409136040E+00,1.9981117208E-02,-9.5203865864E-05,7.9739318223E+00,-7.5614568881E-02,4.7237011074E-04)
   
@@ -119,7 +119,7 @@ SwimmingSpeed <- function(radius){
 return(u)
 }
  
-RelativeSwimmingEncounter <- function(radius1,radius2,Temperature=15,Salinity=35){
+RelativeSwimmingEncounter <- function(radius1, radius2, Temperature=15, Salinity=35){
 	#inputs:  radius1, radius2 as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
 	#output:  encounter rate [m^3/second]
 	
@@ -140,11 +140,11 @@ EncounterRate <- function(prey_radius, predator_radius, Temperature=15, Salinity
 	#output:  encounter rate [m^3/second]
 	
 	#Following Talmy et al. 2019. https://doi.org/10.3389/fmars.2019.00182
-	if(type==1){  #equation 4
+	if(Enc_Type==1){  #equation 4
 		Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
-	} else if(type==2){ #equation 5 - motile predators (grazers)
+	} else if(Enc_Type==2){ #equation 5 - motile predators (grazers)
 		Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + 4*pi*(Stokes_Einstein_Sutherland(prey_radius,Temperature,Salinity))*(prey_radius+predator_radius)
-	} else if(type==3){ # equation 6 - diffusion predators (viruses)
+	} else if(Enc_Type==3){ # equation 6 - diffusion predators (viruses)
 		Encounter = pi*SwimmingSpeed(prey_radius)*(prey_radius+predator_radius)^2 + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
 	} else{
 		stop("Input for Enc_Type is not documented")
