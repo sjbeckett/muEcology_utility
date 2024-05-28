@@ -4,6 +4,8 @@
 # constants -- some constants.
 # ViralQuotaJover2014 -- molar quotas of viruses from size following Jover et al. 2014.
 # dynamicViscosity -- computation of dynamic viscosity of seawater
+# densitySW -- computation of seawater density
+# kinematicViscosity -- computation of kinematic viscosity of seawater
 # Stokes_Einstein_Sutherland -- translational diffusion
 # Stokes_Einstein_Debye -- rotational diffusion
 # SmoluchowskiCoagulation -- encounter via diffusion of spheres of differing radii.
@@ -60,6 +62,30 @@ dynamicViscosity <- function(Temperature=15, Salinity=35){
 return(mu)
 }
 
+densitySW <- function(Temperature=15, Salinity=35, Pressure = 0.101325){
+	#inputs: Temperature as Celcius; Salinity as g/kg; Pressure as MPa; defined for 0 < T < 180 C and 0 < S < 150 g/kg and 0 < P < 12 MPa.
+	#output: denity of seawater [kg/m^3]
+	#Following Nayar et al. 2016. http://dx.doi.org/10.1016/j.desal.2016.02.024
+	#from MIT seawater:  http://web.mit.edu/seawater/
+	
+	T = Temperature
+	S = Salinity/1000
+	P = Pressure
+	P0 = 0.101325 # atmospheric pressure [MPa]
+	a = c(9.999*10^2, 2.034*10^-2, -6.162*10^-3, 2.261*10^-5, -4.657*10^-8)
+	b = c(8.02*10^2, -2.001, 1.677*10^-2, -3.06*10^-5, -1.613*10^-5)
+	psw_P0 = (a[1] + a[2]*T + a[3]*T^2 + a[4]*T^3 + a[5]*T^4) + (b[1]*S + b[2]*S*T + b[3]*S*T^2 + b[4]*S*T^3 + b[5]*S^2*T^2)
+	cc = c(5.0792*10^-4, -3.4168*10^-6, 5.6931*10^-8, -3.7263*10^-10, 1.4465*10^-12, -1.7058*10^-15, -1.3389*10^-6, 4.8603*10^-9, -6.8039*10^-13)
+	d = c(-1.1077*10^-6, 5.5585*10^-9, -4.2539*10^-11, 8.3702*10^-9)
+	Fp = exp((P-P0)*(cc[1]+cc[2]*T+cc[3]*T^2+cc[4]*T^3+cc[5]*T^4+cc[6]*T^5 + S*(d[1]+d[2]*T+d[3]*T^2)) + 0.5*(P^2-P0^2)*(cc[7]+cc[8]*T+cc[9]*T^3+d[4]*S))
+return(Fp*psw_P0)
+}
+
+kinematicViscosity <- function(Temperature=15, Salinity=35, Pressure = 0.101325){
+	#inputs: Temperature as Celcius; Salinity as g/kg; Pressure as MPa; defined for 0 < T < 180 C and 0 < S < 150 g/kg and 0 < P < 12 MPa.
+	#output: Kinematic viscosity [m^2/s]
+	return( dynamicViscosity(Temperature, Salinity)/densitySW(Temperature, Salinity, Pressure) )
+}
 
 Stokes_Einstein_Sutherland <- function(radius, Temperature=15, Salinity=35){ #translational diffusion - movement across space
 	#inputs: radius as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
