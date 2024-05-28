@@ -2,7 +2,7 @@
 # inputs typically as microns, outputs typically at metres, seconds
 #
 # constants -- some constants.
-# ViralQuotaJover2014 -- molar quotas of viruses from size following Jover et al. 2014.
+# ViralQuota -- molar quotas of viruses from size
 # dynamicViscosity -- computation of dynamic viscosity of seawater
 # densitySW -- computation of seawater density
 # kinematicViscosity -- computation of kinematic viscosity of seawater
@@ -27,19 +27,28 @@ constants <- function(){
  return(constants)
  }
 
-ViralQuotaJover2014 <- function(rv){
+ViralQuota <- function(rv){
 	#inputs: viral capsid radius rv in micron
-  	#outputs: quotas for C, N, P [mmol X per indiv]
-  	rv = rv/1000 #convert micron to nm
+  	#outputs: quotas for C, N, P [mmol X per indiv] # milimole X per indiv
+  	rv = rv*1000 #convert from micron to nm
 	
   	#Following Jover et al. 2014 https://doi.org/10.1038/nrmicro3289
-  	x = (10^6/constants()$Avogadro)
+  	x = (10^3/constants()$Avogadro)
   	#Quotas from Jover et al. 2014: https://doi.org/10.1038/nrmicro3289
   	# all in micromole X per virus
      	QC = x*(41*(rv-2.5)^3 + 130*(7.5*rv^2 - 18.75*rv +15.63))
      	QN = x*(16*(rv-2.5)^3 + 36*(7.5*rv^2 - 18.75*rv +15.63))
      	QP = x*4.2*(rv-2.5)^3
-	return(cbind(QC,QN,QP))
+return(cbind(QC,QN,QP))
+}
+
+GrazerQuota <- function(rg){
+	#inputs: grazer radius rg in micron
+	#output: quota for C [mmol X per indiv] #milimole X per indiv
+	#Following dinoflagellate relationship in Menden-Deuer and Lessard, 2000. https://doi.org/10.4319/lo.2000.45.3.0569 (note may differ for other groups: e.g. https://doi.org/10.1002/lno.12284)
+	mugC = 10^-6 * 0.76* radius_2_volume(rg)^0.819 #microgram C per cell
+	QC = mugC/constants()$MM_C/1000 # milimolar C per cell
+return(QC)
 }
 
 dynamicViscosity <- function(Temperature=15, Salinity=35){
