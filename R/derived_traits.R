@@ -44,11 +44,13 @@ return(cbind(QC,QN,QP))
 
 GrazerQuota <- function(rg){
 	#inputs: grazer radius rg in micron
-	#output: quota for C [mmol X per indiv] #milimole X per indiv
-	#Following dinoflagellate relationship in Menden-Deuer and Lessard, 2000. https://doi.org/10.4319/lo.2000.45.3.0569 (note may differ for other groups: e.g. https://doi.org/10.1002/lno.12284)
-	mugC = 10^-6 * 0.76* radius_2_volume(rg)^0.819 #microgram C per cell
-	QC = mugC/constants()$MM_C/1000 # milimolar C per cell
-return(QC)
+	#output: quota for C, N [mmol X per indiv] #milimole X per indiv
+	#Following dinoflagellate relationship in Menden-Deuer and Lessard, 2000. https://doi.org/10.4319/lo.2000.45.3.0569 (note may differ for other groups: e.g., https://doi.org/10.1002/lno.12284)
+	mgC = 10^-9 * 0.76* radius_2_volume(rg)^0.819 #miligram C per cell
+	mgN = 10^-9 * 0.118* radius_2_volume(rg)^0.849 #miligram N per cell
+	QC = mgC/constants()$MM_C # milimolar C per cell
+	QN = mgN/constants()$MM_N # milimolar N per cell
+return(cbind(QC,QN))
 }
 
 dynamicViscosity <- function(Temperature=15, Salinity=35){
