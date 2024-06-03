@@ -34,7 +34,7 @@ def ViralQuota(rv):
     #outputs: quotas for C, N, P [mmol X per indiv] # milimole X per indiv
     rv = rv*1000 #convert from micron to nm
     #Following Jover et al. 2014 https://doi.org/10.1038/nrmicro3289
-    x = (10^3/Constants().Avogadro)
+    x = (10**3/Constants().Avogadro)
     #Quotas from Jover et al. 2014: https://doi.org/10.1038/nrmicro3289
     # all in micromole X per virus
     QC = x*(41*(rv-2.5)**3 + 130*(7.5*rv**2 - 18.75*rv +15.63))
