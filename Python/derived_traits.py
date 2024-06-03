@@ -28,16 +28,13 @@ class Constants:
         constants.MM_P = 30.974 #molar mass phosphorous [g/mol]
         constants.MM_Si = 28.085 #molar mass silica [g/mol]
 
-# This function returns an object of Constants 
-def constants(): 
-    return Constants() 
-    
+
 def ViralQuota(rv):
     #inputs: viral capsid radius rv in micron
     #outputs: quotas for C, N, P [mmol X per indiv] # milimole X per indiv
     rv = rv*1000 #convert from micron to nm
     #Following Jover et al. 2014 https://doi.org/10.1038/nrmicro3289
-    x = (10^3/constants().Avogadro)
+    x = (10^3/Constants().Avogadro)
     #Quotas from Jover et al. 2014: https://doi.org/10.1038/nrmicro3289
     # all in micromole X per virus
     QC = x*(41*(rv-2.5)**3 + 130*(7.5*rv**2 - 18.75*rv +15.63))
@@ -45,9 +42,11 @@ def ViralQuota(rv):
     QP = x*4.2*(rv-2.5)**3
     return QC, QN, QP
 
+
 def radius_2_volume(radius):
     V = 4/3*math.pi*radius**3
     return V
+
 
 def GrazerQuota(rg):
     #inputs: grazer radius rg in micron
@@ -55,10 +54,11 @@ def GrazerQuota(rg):
     #Following dinoflagellate relationship in Menden-Deuer and Lessard, 2000. https://doi.org/10.4319/lo.2000.45.3.0569 (note may differ for other groups: e.g., https://doi.org/10.1002/lno.12284)
     mgC = 10**-9 * 0.76* radius_2_volume(rg)**0.819 #miligram C per cell
     mgN = 10**-9 * 0.118* radius_2_volume(rg)**0.849 #miligram N per cell
-    QC = mgC/constants().MM_C # milimolar C per cell
-    QN = mgN/constants().MM_N # milimolar N per cell
+    QC = mgC/Constants().MM_C # milimolar C per cell
+    QN = mgN/Constants().MM_N # milimolar N per cell
     return QC, QN
     
+
 def dynamicViscosity(Temperature=15, Salinity=35):
     #inputs: Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
     #ouputs: dynamic viscocity of seawater [kg/m-s]
@@ -76,6 +76,7 @@ def dynamicViscosity(Temperature=15, Salinity=35):
     B  = a[7] + a[8] * T + a[9]* T**2
     mu = mu_w*(1 + A*S + B*S**2) # [kg/m-s]
     return mu
+
 
 def densitySW(Temperature=15, Salinity=35, Pressure = 0.101325):
     #inputs: Temperature as Celcius; Salinity as g/kg; Pressure as MPa; defined for 0 < T < 180 C and 0 < S < 150 g/kg and 0 < P < 12 MPa.
@@ -95,6 +96,7 @@ def densitySW(Temperature=15, Salinity=35, Pressure = 0.101325):
     rho = Fp*psw_P0
     return rho
 	
+
 def kinematicViscosity(Temperature=15, Salinity=35, Pressure = 0.101325):
     #inputs: Temperature as Celcius; Salinity as g/kg; Pressure as MPa; defined for 0 < T < 180 C and 0 < S < 150 g/kg and 0 < P < 12 MPa.
     #output: Kinematic viscosity [m^2/s]
@@ -103,19 +105,22 @@ def kinematicViscosity(Temperature=15, Salinity=35, Pressure = 0.101325):
     k = v/k
     return k
 
+
 def Stokes_Einstein_Sutherland(radius, Temperature=15, Salinity=35): #translational diffusion - movement across space
     #inputs: radius as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
     #output: diffusion as [m^2/s]
     DynamicViscosity = dynamicViscosity(Temperature,Salinity) # [kg/m-s]
-    Diff_t = (constants().Boltzmann*Celcius2Kelvin(Temperature))/( 6*math.pi*micron_2_metre(radius)*DynamicViscosity ) # [m^2/s]
+    Diff_t = (Constants().Boltzmann*Celcius2Kelvin(Temperature))/( 6*math.pi*micron_2_metre(radius)*DynamicViscosity ) # [m^2/s]
     return Diff_t
+
 
 def Stokes_Einstein_Debye(radius, Temperature=15, Salinity=35): #rotational diffusion - angular rotation
     #inputs: radius as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
     #output: diffusion as [m^2/s]
     DynamicViscosity = dynamicViscosity(Temperature,Salinity) # [kg/m-s]
-    Diff_r = (constants().Boltzmann*Celcius2Kelvin(Temperature))/( 8*math.pi**micron_2_metre(radius)**3*DynamicViscosity ) # [m^2/s]
+    Diff_r = (Constants().Boltzmann*Celcius2Kelvin(Temperature))/( 8*math.pi**micron_2_metre(radius)**3*DynamicViscosity ) # [m^2/s]
     return Diff_r
+
 
 def SmoluchowskiCoagulation(radius1,radius2, Temperature=15, Salinity=35):
     #inputs:  radius1, radius2 in micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
@@ -123,6 +128,7 @@ def SmoluchowskiCoagulation(radius1,radius2, Temperature=15, Salinity=35):
     SC = 4*math.pi*(micron_2_metre(radius1) + micron_2_metre(radius2))*(Stokes_Einstein_Sutherland(radius1,Temperature,Salinity) + Stokes_Einstein_Sutherland(radius2,Temperature,Salinity)) # [m^3/s]
     return SC
     
+
 def SwimmingSpeed(radius):
     #inputs: radius as micron.  Valid for 1 micron to 1 cm.
     #output: swimming speed as  m per second
@@ -131,8 +137,10 @@ def SwimmingSpeed(radius):
     u = math.exp(0.39 + 0.79*math.log((2*radius)/10**4))/10**2 # [m/s]
     return u
 
+
 def micron_2_metre(x):
     return x/(10**6)
+
 
 def RelativeSwimmingEncounter(radius1, radius2, Temperature=15, Salinity=35):
     #inputs:  radius1, radius2 as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
@@ -147,19 +155,18 @@ def RelativeSwimmingEncounter(radius1, radius2, Temperature=15, Salinity=35):
     Enc = ((swim1**2+swim2**2)^0.5)*math.pi*(predator*fdetect + prey)**2  # m^3 per second
     return Enc
 
+
 def EncounterRate(prey_radius, predator_radius, Temperature=15, Salinity=35, Enc_Type=1):
     #inputs:  prey_radius, predator_radius as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
-    #	Enc_Type -- 1), full predator-prey setup (assuming both motile) 2), predator-prey assuming both motile and predator diffusion is negligble, 3) predator-prey assuming diffusive predator, with mobile prey.
+    #Enc_Type -- 1), full predator-prey setup (assuming both motile) 2), predator-prey assuming both motile and predator diffusion is negligble, 3) predator-prey assuming diffusive predator, with mobile prey.
     #output:  encounter rate [m^3/second]
-    
     #Following Talmy et al. 2019. https://doi.org/10.3389/fmars.2019.00182
     if Enc_Type==1:  #equation 4
-    	Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
+        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
     elif Enc_Type==2: #equation 5 - motile predators (grazers)
-    	Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + 4*math.pi*(Stokes_Einstein_Sutherland(prey_radius,Temperature,Salinity))*(prey_radius+predator_radius)
+        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + 4*math.pi*(Stokes_Einstein_Sutherland(prey_radius,Temperature,Salinity))*(prey_radius+predator_radius)
     elif Enc_Type==3: # equation 6 - diffusion predators (viruses)
-    	Encounter = math.pi*SwimmingSpeed(prey_radius)*(prey_radius+predator_radius)**2 + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
+        Encounter = math.pi*SwimmingSpeed(prey_radius)*(prey_radius+predator_radius)**2 + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
     else:
-    	warnings.warn("Input for Enc_Type is not documented")
-    
+        warnings.warn("Input for Enc_Type is not documented")
     return Encounter
