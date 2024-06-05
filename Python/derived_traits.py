@@ -142,12 +142,11 @@ def micron_2_metre(x):
     return x/(10**6)
 
 
-def RelativeSwimmingEncounter(radius1, radius2, Temperature=15, Salinity=35):
-    #inputs:  radius1, radius2 as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
+def RelativeSwimmingEncounter(radius1, radius2, fdetect=3, Temperature=15, Salinity=35):
+    #inputs:  radius1, radius2 as micron; fdetect as scaler: detect = fdetect*r; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
     #output:  encounter rate [m^3/second]
     
     #Following Talmy et al. 2019 https://doi.org/10.3389/fmars.2019.00182
-    fdetect = 3; #predator detection radius factor (detection = fdetect*r)
     predator = micron_2_metre(max(radius1,radius2))
     prey = micron_2_metre(min(radius1,radius2))
     swim1 = SwimmingSpeed(radius1)
@@ -156,17 +155,21 @@ def RelativeSwimmingEncounter(radius1, radius2, Temperature=15, Salinity=35):
     return Enc
 
 
-def EncounterRate(prey_radius, predator_radius, Temperature=15, Salinity=35, Enc_Type=1):
-    #inputs:  prey_radius, predator_radius as micron; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
+def EncounterRate(prey_radius, predator_radius, fdetect=3, Temperature=15, Salinity=35, Enc_Type=1):
+    #inputs:  prey_radius, predator_radius as micron; fdetect as scaler: detect = fdetect*r; Temperature as Celcius; Salinity as g/kg; defined for 0 < T < 180 C and 0 < S < 150 g/kg.
     #Enc_Type -- 1), full predator-prey setup (assuming both motile) 2), predator-prey assuming both motile and predator diffusion is negligble, 3) predator-prey assuming diffusive predator, with mobile prey.
     #output:  encounter rate [m^3/second]
     #Following Talmy et al. 2019. https://doi.org/10.3389/fmars.2019.00182
     if Enc_Type==1:  #equation 4
-        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
+        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,fdetect,Temperature,Salinity) + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
     elif Enc_Type==2: #equation 5 - motile predators (grazers)
-        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,Temperature,Salinity) + 4*math.pi*(Stokes_Einstein_Sutherland(prey_radius,Temperature,Salinity))*(prey_radius+predator_radius)
+        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,fdetect,Temperature,Salinity) + 4*math.pi*(Stokes_Einstein_Sutherland(prey_radius,Temperature,Salinity))*(prey_radius+predator_radius)
     elif Enc_Type==3: # equation 6 - diffusion predators (viruses)
         Encounter = math.pi*SwimmingSpeed(prey_radius)*(prey_radius+predator_radius)**2 + SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
+    elif Enc_Type==4: # diffusion only
+        Encounter = SmoluchowskiCoagulation(prey_radius,predator_radius,Temperature,Salinity)
+    elif Enc_Type==5: # swimming only
+        Encounter = RelativeSwimmingEncounter(prey_radius,predator_radius,fdetect,Temperature,Salinity)
     else:
         warnings.warn("Input for Enc_Type is not documented")
     return Encounter
